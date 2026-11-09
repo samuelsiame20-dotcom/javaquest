@@ -10,10 +10,13 @@ repositories {
 }
 
 dependencies {
+    // The game runs each room's tests itself, so the JUnit Platform Launcher is a main dependency.
+    implementation platform('org.junit:junit-bom:6.1.3')
+    implementation 'org.junit.platform:junit-platform-launcher'
+
     // JUnit 6 keeps the JUnit 5 "Jupiter" API (@Test, assertEquals, @Timeout, ...).
     testImplementation platform('org.junit:junit-bom:6.1.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 // Build Java 21 bytecode/API no matter which JDK (21, 25, ...) runs Gradle.
@@ -70,6 +73,18 @@ def testReference = tasks.register('testReference', Test) {
 
 tasks.named('check') {
     dependsOn testReference
+}
+
+// Engine tests only (quest.engine.*), against main. Unlike `test`, this must ALWAYS pass:
+// it keeps real engine bugs from hiding among the expected failures of unfinished levels.
+tasks.register('testEngine', Test) {
+    description = 'Runs only the engine tests against main (should always pass).'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    filter {
+        includeTestsMatching 'quest.engine.*'
+    }
 }
 
 // `gradlew.bat quest` compiles your code and the locks, then starts the game.
