@@ -95,4 +95,6 @@ tasks.register('quest', JavaExec) {
     mainClass = 'quest.engine.Game'
     classpath = sourceSets.test.runtimeClasspath
     standardInput = System.in
+    // The game prints its own errors (e.g. a mistyped option); don't add a scary BUILD FAILED on top.
+    ignoreExitValue = true
 }
