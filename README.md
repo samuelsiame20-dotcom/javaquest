@@ -10,7 +10,7 @@ with a `TODO`; a JUnit test class is the door's lock. Make the tests pass and th
 
 1. JDK 21 or newer (`java -version`). The code is compiled for Java 21, so JDK 21 and JDK 25 both work.
 2. Git.
-3. That's it. You don't install Gradle: `gradlew.bat` downloads the pinned version (9.9.0) the first time.
+3. That's it. You don't install Gradle: `gradlew.bat` downloads the pinned version (9.8.0) the first time.
 
 ## Play
 
