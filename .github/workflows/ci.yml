@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  prove-levels-solvable:
+    # Windows-first project, so CI runs on Windows too.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # JDK 21 is the documented minimum; testing on it proves the floor.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Caches Gradle and validates the wrapper jar's checksum.
+      - uses: gradle/actions/setup-gradle@v6
+
+      # `test` is NOT run: it tests the player's unfinished stubs and is expected to fail.
+      - name: Compile and prove every level is solvable
+        run: .\gradlew.bat assemble testReference

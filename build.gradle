@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+}
+
+group = 'quest'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit 6 keeps the JUnit 5 "Jupiter" API (@Test, assertEquals, @Timeout, ...).
+    testImplementation platform('org.junit:junit-bom:6.1.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Build Java 21 bytecode/API no matter which JDK (21, 25, ...) runs Gradle.
+// This keeps the game runnable on the course's JDK 21 without needing a toolchain download.
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation']
+}
+
+// ---------------------------------------------------------------------------
+// Source sets
+//   main      = engine + PLAYER stubs (src/main/java/quest/levels/**)
+//   test      = the locks: one test class per level (+ engine tests later)
+//   reference = solutions with the SAME package/class names as the stubs,
+//               used only to prove every lock can be opened.
+// ---------------------------------------------------------------------------
+sourceSets {
+    reference {
+        // Solutions are standalone: they deliberately do not see main's stubs.
+    }
+}
+
+// Copy of main's compiled output WITHOUT the player's level classes.
+// testReference puts this on the classpath instead of main, so a stub can never
+// shadow its reference solution (both share the same fully-qualified name).
+def engineClasses = tasks.register('engineClasses', Sync) {
+    description = 'Copies compiled engine classes, excluding player level stubs.'
+    from sourceSets.main.output
+    exclude 'quest/levels/**'
+    into layout.buildDirectory.dir('engine-classes')
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        // Show our assertion messages: they are the game's teaching surface.
+        exceptionFormat = 'full'
+        showStackTraces = false
+    }
+}
+
+// `gradlew.bat test` runs the locks against YOUR stubs. Unfinished levels fail here; that's expected.
+
+def testReference = tasks.register('testReference', Test) {
+    description = 'Runs every level test against the reference solutions (proves each level is solvable).'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = files(sourceSets.reference.output, sourceSets.test.output, engineClasses) +
+            configurations.testRuntimeClasspath
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.named('check') {
+    dependsOn testReference
+}
+
+// `gradlew.bat quest` compiles your code and the locks, then starts the game.
+// The test classes are on the classpath because the game runs them to check your code.
+tasks.register('quest', JavaExec) {
+    description = 'Play JavaQuest: show your current room and test your code.'
+    group = 'application'
+    mainClass = 'quest.engine.Game'
+    classpath = sourceSets.test.runtimeClasspath
+    standardInput = System.in
+}
