@@ -7,7 +7,7 @@ package quest.levels.w0;
  * The door only opens for a proper greeting.
  *
  * <p>YOUR TASK: make {@link #greet(String)} return {@code "Hello, <name>!"}.
- * Then run {@code gradlew.bat test} to try the lock.
+ * Then run {@code gradlew.bat quest} to try the lock.
  */
 public class Level00_Doorbell {
 
