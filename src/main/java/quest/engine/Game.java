@@ -61,6 +61,7 @@ public final class Game {
             Progress progress = store.load();
             if (firstVisit) {
                 ui.welcome();
+                store.save(progress); // so the welcome banner only shows once
             }
             return new Game(store, progress, new LevelRunner(), ui).execute(options);
         } catch (UncheckedIOException e) {
