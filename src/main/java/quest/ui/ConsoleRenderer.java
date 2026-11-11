@@ -166,9 +166,17 @@ public final class ConsoleRenderer implements Renderer {
             String name = tier <= HINT_TIERS.length ? HINT_TIERS[tier - 1] : "extra";
             out.println(paint(YELLOW + BOLD, " HINT " + tier + "/" + level.hints().size() + " (" + name + ")"));
             for (String line : level.hints().get(tier - 1).strip().split("\\R")) {
-                // Keep line breaks (pseudo-code relies on them); only wrap lines that are too long.
-                for (String wrapped : line.isBlank() ? List.of("") : wrap(line, WIDTH - 4)) {
-                    out.println("    " + wrapped);
+                // Keep line breaks AND indentation (pseudo-code relies on both); only wrap lines that are
+                // too long, indenting the continuation so it reads as part of the same line.
+                String body = line.stripLeading();
+                if (body.isEmpty()) {
+                    out.println();
+                    continue;
+                }
+                String indent = "    " + line.substring(0, line.length() - body.length());
+                List<String> wrapped = wrap(body, Math.max(20, WIDTH - indent.length() - 2));
+                for (int i = 0; i < wrapped.size(); i++) {
+                    out.println(indent + (i > 0 ? "  " : "") + wrapped.get(i));
                 }
             }
             out.println();
