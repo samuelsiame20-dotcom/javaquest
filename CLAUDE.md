@@ -15,6 +15,8 @@ JUnit tests are the door locks. Full spec: `docs/PLAN.md`. Read it before any wo
 2. Every stub **must compile** as shipped so one unfinished level never breaks the build. Every method
    body is exactly `throw new UnsupportedOperationException("TODO");`. The engine relies on that
    placeholder to tell "not started" (show the room's story) from "wrong" (show the failures).
+   Only unavoidable boilerplate may be real code: given records, enum constructors, and a `super(...)`
+   line a subclass constructor needs to compile. Every test must hit a TODO on a fresh stub.
 3. Reference solutions live only in `src/reference/java/**` and exist to prove the tests are solvable.
 4. Test failure messages are the teaching surface. Every assertion message says what was expected and
    gives a nudge, e.g. `"takeDamage(150) should clamp HP at 0, not go negative — check your if."`
